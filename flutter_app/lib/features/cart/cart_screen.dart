@@ -1,11 +1,77 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/graphql/graphql_queries.dart';
+import '../../core/services/graphql_service.dart';
 import '../../core/theme/app_theme.dart';
 import 'cart_controller.dart';
 
-class CartScreen extends StatelessWidget {
+class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
+
+  @override
+  State<CartScreen> createState() => _CartScreenState();
+}
+
+class _CartScreenState extends State<CartScreen> {
+  bool _isSubmitting = false;
+
+  Future<void> _processCheckout(CartController cart) async {
+    if (cart.items.isEmpty) return;
+
+    setState(() => _isSubmitting = true);
+
+    try {
+      final graphqlService = context.read<GraphQLService>();
+      final result = await graphqlService.mutate(
+        GraphQLQueries.placeOrderMutation,
+        variables: {
+          'amount': cart.subtotal,
+          'paymentMethod': 'CASH',
+        },
+      );
+
+      if (!result.hasException && result.data?['placeOrder'] != null) {
+        final orderData = result.data!['placeOrder'] as Map<String, dynamic>;
+        final orderId = orderData['order_id']?.toString() ?? 'ORD-0000';
+
+        cart.clear();
+
+        if (mounted) {
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('🎉 ¡Pedido Registrado!'),
+              content: Text('Tu pedido $orderId ha sido guardado exitosamente en el sistema.'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context); // Close Dialog
+                    Navigator.pop(context); // Back to Home
+                  },
+                  child: const Text('OK'),
+                ),
+              ],
+            ),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Error al registrar el pedido en el servidor.')),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error inesperado: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -172,29 +238,13 @@ class CartScreen extends StatelessWidget {
                           backgroundColor: AppTheme.primary,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         ),
-                        onPressed: () {
-                          cart.clear();
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: const Text('🎉 Pedido Exitoso'),
-                              content: const Text('Tu pedido ha sido registrado con éxito. ¡Pronto estará en camino!'),
-                              actions: [
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                    Navigator.pop(context);
-                                  },
-                                  child: const Text('OK'),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                        child: const Text(
-                          'Confirmar Pedido',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-                        ),
+                        onPressed: _isSubmitting ? null : () => _processCheckout(cart),
+                        child: _isSubmitting
+                            ? const CircularProgressIndicator(color: Colors.white)
+                            : const Text(
+                                'Confirmar Pedido',
+                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                              ),
                       ),
                     ),
                   ],

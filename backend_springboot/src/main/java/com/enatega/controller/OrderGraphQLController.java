@@ -3,6 +3,7 @@ package com.enatega.controller;
 import com.enatega.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.graphql.data.method.annotation.Argument;
+import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
 
@@ -23,5 +24,10 @@ public class OrderGraphQLController {
     @QueryMapping
     public Map<String, Object> order(@Argument String id) {
         return orderService.getOrderById(id);
+    }
+
+    @MutationMapping
+    public Map<String, Object> placeOrder(@Argument("amount") Double amount, @Argument("paymentMethod") String paymentMethod) {
+        return orderService.placeOrder(amount != null ? amount : 0.0, paymentMethod);
     }
 }

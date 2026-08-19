@@ -138,4 +138,41 @@ class GraphQLQueries {
       }
     }
   ''';
+
+  static const String placeOrderMutation = '''
+    mutation PlaceOrder(\$amount: Float!, \$paymentMethod: String) {
+      placeOrder(amount: \$amount, paymentMethod: \$paymentMethod) {
+        _id
+        order_id
+        order_amount
+        paid_amount
+        order_status
+        payment_method
+        createdAt
+      }
+    }
+  ''';
+
+  static const String createAddressMutation = '''
+    mutation CreateAddress(\$label: String!, \$delivery_address: String!, \$details: String, \$longitude: Float, \$latitude: Float, \$selected: Boolean) {
+      createAddress(addressInput: {
+        label: \$label,
+        delivery_address: \$delivery_address,
+        details: \$details,
+        longitude: \$longitude,
+        latitude: \$latitude,
+        selected: \$selected
+      }) {
+        _id
+        name
+        addresses {
+          _id
+          label
+          delivery_address
+          details
+          selected
+        }
+      }
+    }
+  ''';
 }
