@@ -35,7 +35,7 @@ public class OrderService {
     }
 
     @Transactional
-    public Map<String, Object> placeOrder(double orderAmount, String paymentMethod, String bankName, String paymentReference, String paymentProofUrl) {
+    public Map<String, Object> placeOrder(double orderAmount, String paymentMethod, String bankName, String paymentReference, String paymentProofUrl, String deliveryAddress, Double latitude, Double longitude) {
         UserEntity user = userRepository.findAll().stream().findFirst()
                 .orElseThrow(() -> new RuntimeException("Usuario no autenticado para realizar pedido."));
 
@@ -49,6 +49,9 @@ public class OrderService {
                 .bankName(bankName)
                 .paymentReference(paymentReference)
                 .paymentProofUrl(paymentProofUrl)
+                .deliveryAddress(deliveryAddress != null ? deliveryAddress : "Ubicación GPS por Defecto")
+                .latitude(latitude != null ? latitude : 10.4806)
+                .longitude(longitude != null ? longitude : -66.9036)
                 .orderAmount(orderAmount)
                 .paidAmount(orderAmount + 2.50)
                 .orderStatus("PENDING")
@@ -69,6 +72,19 @@ public class OrderService {
         return buildOrderMap(updated);
     }
 
+    @Transactional
+    public Map<String, Object> updatePaymentStatus(String id, String paymentStatus, String orderStatus) {
+        OrderEntity order = orderRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Pedido no encontrado con ID: " + id));
+
+        order.setPaymentStatus(paymentStatus);
+        if (orderStatus != null && !orderStatus.isEmpty()) {
+            order.setOrderStatus(orderStatus);
+        }
+        OrderEntity updated = orderRepository.save(order);
+        return buildOrderMap(updated);
+    }
+
     private Map<String, Object> buildOrderMap(OrderEntity order) {
         Map<String, Object> map = new HashMap<>();
         map.put("_id", order.getId());
@@ -79,6 +95,9 @@ public class OrderService {
         map.put("bank_name", order.getBankName());
         map.put("payment_reference", order.getPaymentReference());
         map.put("payment_proof_url", order.getPaymentProofUrl());
+        map.put("delivery_address_text", order.getDeliveryAddress());
+        map.put("latitude", order.getLatitude());
+        map.put("longitude", order.getLongitude());
         map.put("order_amount", order.getOrderAmount());
         map.put("paid_amount", order.getPaidAmount());
         map.put("order_status", order.getOrderStatus());

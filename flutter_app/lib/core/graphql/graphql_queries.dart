@@ -112,6 +112,12 @@ class GraphQLQueries {
         delivery_charges
         payment_status
         payment_method
+        bank_name
+        payment_reference
+        payment_proof_url
+        delivery_address_text
+        latitude
+        longitude
         order_amount
         paid_amount
         order_status
@@ -140,8 +146,8 @@ class GraphQLQueries {
   ''';
 
   static const String placeOrderMutation = '''
-    mutation PlaceOrder(\$amount: Float!, \$paymentMethod: String, \$bankName: String, \$paymentReference: String, \$paymentProofUrl: String) {
-      placeOrder(amount: \$amount, paymentMethod: \$paymentMethod, bankName: \$bankName, paymentReference: \$paymentReference, paymentProofUrl: \$paymentProofUrl) {
+    mutation PlaceOrder(\$amount: Float!, \$paymentMethod: String, \$bankName: String, \$paymentReference: String, \$paymentProofUrl: String, \$deliveryAddress: String, \$latitude: Float, \$longitude: Float) {
+      placeOrder(amount: \$amount, paymentMethod: \$paymentMethod, bankName: \$bankName, paymentReference: \$paymentReference, paymentProofUrl: \$paymentProofUrl, deliveryAddress: \$deliveryAddress, latitude: \$latitude, longitude: \$longitude) {
         _id
         order_id
         order_amount
@@ -151,6 +157,9 @@ class GraphQLQueries {
         bank_name
         payment_reference
         payment_proof_url
+        delivery_address_text
+        latitude
+        longitude
         createdAt
       }
     }
@@ -202,6 +211,9 @@ class GraphQLQueries {
         bank_name
         payment_reference
         payment_proof_url
+        delivery_address_text
+        latitude
+        longitude
         order_amount
         paid_amount
         order_status
@@ -229,6 +241,18 @@ class GraphQLQueries {
         img_url
         price
         stock
+      }
+    }
+  ''';
+
+  static const String updatePaymentStatusMutation = '''
+    mutation UpdatePaymentStatus(\$id: ID!, \$paymentStatus: String!, \$orderStatus: String!) {
+      updatePaymentStatus(id: \$id, paymentStatus: \$paymentStatus, orderStatus: \$orderStatus) {
+        _id
+        order_id
+        payment_status
+        order_status
+        paid_amount
       }
     }
   ''';

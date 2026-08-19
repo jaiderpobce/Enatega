@@ -5,6 +5,7 @@ import '../../core/graphql/graphql_queries.dart';
 import '../../core/services/graphql_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../auth/auth_controller.dart';
+import 'location_picker_screen.dart';
 
 class AddAddressScreen extends StatefulWidget {
   const AddAddressScreen({super.key});
@@ -18,6 +19,9 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
   final _labelController = TextEditingController(text: 'Casa');
   final _addressController = TextEditingController();
   final _detailsController = TextEditingController();
+  
+  double? _latitude;
+  double? _longitude;
   bool _isLoading = false;
 
   @override
@@ -41,6 +45,8 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
           'label': _labelController.text.trim(),
           'delivery_address': _addressController.text.trim(),
           'details': _detailsController.text.trim(),
+          'latitude': _latitude ?? 10.4806,
+          'longitude': _longitude ?? -66.9036,
           'selected': true,
         },
       );
@@ -75,6 +81,32 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
     }
   }
 
+  Future<void> _openGoogleMapPicker() async {
+    final result = await Navigator.push<Map<String, dynamic>>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => LocationPickerScreen(
+          initialLatitude: _latitude ?? 10.4806,
+          initialLongitude: _longitude ?? -66.9036,
+        ),
+      ),
+    );
+
+    if (result != null && mounted) {
+      setState(() {
+        _addressController.text = result['address']?.toString() ?? _addressController.text;
+        _latitude = (result['latitude'] as num?)?.toDouble() ?? _latitude;
+        _longitude = (result['longitude'] as num?)?.toDouble() ?? _longitude;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('📍 Ubicación seleccionada en mapa: Lat ${_latitude!.toStringAsFixed(4)}, Lng ${_longitude!.toStringAsFixed(4)}'),
+          backgroundColor: AppTheme.primary,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -88,6 +120,49 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Google GPS Location Button Card
+              InkWell(
+                onTap: _openGoogleMapPicker,
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppTheme.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppTheme.primary, width: 1.5),
+                  ),
+                  child: Row(
+                    children: [
+                      const CircleAvatar(
+                        backgroundColor: AppTheme.primary,
+                        child: Icon(Icons.map, color: Colors.white),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              '🗺️ Abrir Mapa de Google (Google Maps)',
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              _latitude != null
+                                  ? 'GPS: Lat ${_latitude!.toStringAsFixed(4)}, Lng ${_longitude!.toStringAsFixed(4)}'
+                                  : 'Toca para abrir el mapa anclado a tu GPS y mover el marcador',
+                              style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Icon(Icons.arrow_forward_ios, size: 16, color: AppTheme.primary),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+
               const Text(
                 'Etiqueta',
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
@@ -102,6 +177,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                 validator: (val) => val == null || val.isEmpty ? 'Requerido' : null,
               ),
               const SizedBox(height: 16),
+
               const Text(
                 'Dirección de Entrega',
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
@@ -116,6 +192,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                 validator: (val) => val == null || val.isEmpty ? 'Ingresa la dirección' : null,
               ),
               const SizedBox(height: 16),
+
               const Text(
                 'Detalles / Referencia (Opcional)',
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
@@ -129,6 +206,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                 ),
               ),
               const SizedBox(height: 32),
+
               SizedBox(
                 width: double.infinity,
                 height: 52,

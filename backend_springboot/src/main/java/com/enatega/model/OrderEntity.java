@@ -39,6 +39,15 @@ public class OrderEntity {
     @Column(name = "payment_proof_url", length = 1000)
     private String paymentProofUrl;
 
+    @Column(name = "delivery_address", length = 1000)
+    private String deliveryAddress;
+
+    @Column(name = "latitude")
+    private Double latitude;
+
+    @Column(name = "longitude")
+    private Double longitude;
+
     @Column(name = "order_amount")
     private Double orderAmount;
 

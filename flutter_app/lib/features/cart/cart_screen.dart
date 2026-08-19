@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/graphql/graphql_queries.dart';
 import '../../core/services/graphql_service.dart';
 import '../../core/theme/app_theme.dart';
+import '../address/location_picker_screen.dart';
 import 'cart_controller.dart';
 import 'payment_proof_screen.dart';
 
@@ -19,6 +21,81 @@ class _CartScreenState extends State<CartScreen> {
   String _selectedPaymentMethod = 'CASH'; // 'CASH' or 'TRANSFER'
   double _discountPercent = 0.0;
   final TextEditingController _couponController = TextEditingController();
+  final TextEditingController _addressController = TextEditingController(text: 'Av. Principal, Caracas (Google Location API)');
+
+  double _latitude = 10.4806;
+  double _longitude = -66.9036;
+  bool _isGettingGps = false;
+
+  @override
+  void dispose() {
+    _couponController.dispose();
+    _addressController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _getCurrentGpsLocation() async {
+    setState(() => _isGettingGps = true);
+    try {
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
+        permission = await Geolocator.requestPermission();
+      }
+
+      Position position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
+      );
+
+      setState(() {
+        _latitude = position.latitude;
+        _longitude = position.longitude;
+        _addressController.text = 'GPS Google API (${position.latitude.toStringAsFixed(4)}, ${position.longitude.toStringAsFixed(4)})';
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('📍 Ubicación capturada: Lat ${position.latitude.toStringAsFixed(4)}, Lng ${position.longitude.toStringAsFixed(4)}'),
+            backgroundColor: AppTheme.primary,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al obtener ubicación GPS: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isGettingGps = false);
+    }
+  }
+
+  Future<void> _openGoogleMapPicker() async {
+    final result = await Navigator.push<Map<String, dynamic>>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => LocationPickerScreen(
+          initialLatitude: _latitude,
+          initialLongitude: _longitude,
+        ),
+      ),
+    );
+
+    if (result != null && mounted) {
+      setState(() {
+        _addressController.text = result['address']?.toString() ?? _addressController.text;
+        _latitude = (result['latitude'] as num?)?.toDouble() ?? _latitude;
+        _longitude = (result['longitude'] as num?)?.toDouble() ?? _longitude;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('📍 Ubicación actualizada en Google Maps: Lat ${_latitude.toStringAsFixed(4)}, Lng ${_longitude.toStringAsFixed(4)}'),
+          backgroundColor: AppTheme.primary,
+        ),
+      );
+    }
+  }
 
   void _applyCoupon() {
     final code = _couponController.text.trim().toUpperCase();
@@ -50,6 +127,9 @@ class _CartScreenState extends State<CartScreen> {
         variables: {
           'amount': grandTotal,
           'paymentMethod': 'CASH',
+          'deliveryAddress': _addressController.text.trim(),
+          'latitude': _latitude,
+          'longitude': _longitude,
         },
       );
 
@@ -236,6 +316,61 @@ class _CartScreenState extends State<CartScreen> {
                     ),
                     const SizedBox(height: 20),
 
+                    // Delivery Location Section (Google API)
+                    const Text(
+                      'Ubicación de Entrega (Google API)',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.grey.shade300),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          TextFormField(
+                            controller: _addressController,
+                            decoration: const InputDecoration(
+                              labelText: 'Dirección o Punto de Referencia',
+                              prefixIcon: Icon(Icons.location_on, color: AppTheme.primary),
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: ElevatedButton.icon(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppTheme.primary,
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                  ),
+                                  icon: const Icon(Icons.map, size: 18),
+                                  label: const Text('🗺️ Abrir Mapa (Google Maps)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                                  onPressed: _openGoogleMapPicker,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              IconButton.outlined(
+                                style: OutlinedButton.styleFrom(foregroundColor: AppTheme.primary),
+                                icon: _isGettingGps
+                                    ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                                    : const Icon(Icons.my_location, size: 20),
+                                onPressed: _isGettingGps ? null : _getCurrentGpsLocation,
+                                tooltip: 'GPS Rápido',
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
                     // Payment Method Selector
                     const Text(
                       'Método de Pago',
@@ -364,7 +499,12 @@ class _CartScreenState extends State<CartScreen> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (_) => PaymentProofScreen(amount: grandTotal),
+                                      builder: (_) => PaymentProofScreen(
+                                        amount: grandTotal,
+                                        deliveryAddress: _addressController.text.trim(),
+                                        latitude: _latitude,
+                                        longitude: _longitude,
+                                      ),
                                     ),
                                   );
                                 } else {

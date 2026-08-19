@@ -94,6 +94,9 @@ type Order {
     bank_name: String
     payment_reference: String
     payment_proof_url: String
+    delivery_address_text: String
+    latitude: Float
+    longitude: Float
     order_amount: Float
     paid_amount: Float
     order_status: String
@@ -125,8 +128,9 @@ type Mutation {
     createUser(userInput: UserInput!): User
     createAddress(addressInput: AddressInput!): User
     assignRoleToUser(userId: ID!, roleName: String!): User
-    placeOrder(amount: Float!, paymentMethod: String, bankName: String, paymentReference: String, paymentProofUrl: String): Order
+    placeOrder(amount: Float!, paymentMethod: String, bankName: String, paymentReference: String, paymentProofUrl: String, deliveryAddress: String, latitude: Float, longitude: Float): Order
     updateOrderStatus(id: ID!, status: String!): Order
+    updatePaymentStatus(id: ID!, paymentStatus: String!, orderStatus: String!): Order
     createFood(title: String!, price: Float!, categoryId: ID!, description: String, imgUrl: String): Food
     createCategory(title: String!, description: String): Category
 }

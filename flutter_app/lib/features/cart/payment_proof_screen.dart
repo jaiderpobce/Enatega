@@ -13,9 +13,15 @@ class PaymentProofScreen extends StatefulWidget {
   const PaymentProofScreen({
     super.key,
     required this.amount,
+    this.deliveryAddress = 'Av. Principal, Edificio Central (GPS Google API)',
+    this.latitude = 10.4806,
+    this.longitude = -66.9036,
   });
 
   final double amount;
+  final String deliveryAddress;
+  final double latitude;
+  final double longitude;
 
   @override
   State<PaymentProofScreen> createState() => _PaymentProofScreenState();
@@ -89,6 +95,9 @@ class _PaymentProofScreenState extends State<PaymentProofScreen> {
           'bankName': _bankController.text.trim(),
           'paymentReference': _referenceController.text.trim(),
           'paymentProofUrl': _proofUrlController.text.trim(),
+          'deliveryAddress': widget.deliveryAddress,
+          'latitude': widget.latitude,
+          'longitude': widget.longitude,
         },
       );
 

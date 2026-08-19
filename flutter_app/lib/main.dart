@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter_android/google_maps_flutter_android.dart';
 import 'package:provider/provider.dart';
 
 import 'app/app.dart';
@@ -9,6 +10,9 @@ import 'features/cart/cart_controller.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  final mapsImplementation = GoogleMapsFlutterAndroid();
+  mapsImplementation.useAndroidViewSurface = true;
 
   final storageService = StorageService();
   await storageService.init();

@@ -71,6 +71,10 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
     final bankName = _orderData?['bank_name']?.toString();
     final reference = _orderData?['payment_reference']?.toString();
     final proofUrl = _orderData?['payment_proof_url']?.toString();
+    final paymentStatus = _orderData?['payment_status']?.toString() ?? 'PENDING';
+    final deliveryAddressText = _orderData?['delivery_address_text']?.toString() ?? 'Ubicación Capturada por GPS (Google API)';
+    final latitude = (_orderData?['latitude'] as num?)?.toDouble() ?? 10.4806;
+    final longitude = (_orderData?['longitude'] as num?)?.toDouble() ?? -66.9036;
 
     final currentStep = _getStepIndex(status);
 
@@ -209,10 +213,47 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
                             children: [
                               Icon(Icons.account_balance, color: AppTheme.primary, size: 20),
                               SizedBox(width: 8),
-                              Text('Datos de Transferencia Bancaria', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                              Expanded(
+                                child: Text(
+                                  'Datos de Transferencia Bancaria',
+                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                ),
+                              ),
                             ],
                           ),
                           const Divider(height: 16),
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: paymentStatus == 'PAID'
+                                      ? Colors.green.withValues(alpha: 0.15)
+                                      : paymentStatus == 'REJECTED'
+                                          ? Colors.red.withValues(alpha: 0.15)
+                                          : Colors.orange.withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  paymentStatus == 'PAID'
+                                      ? '✅ PAGO APROBADO'
+                                      : paymentStatus == 'REJECTED'
+                                          ? '❌ PAGO RECHAZADO'
+                                          : '⏳ VERIFICANDO PAGO',
+                                  style: TextStyle(
+                                    color: paymentStatus == 'PAID'
+                                        ? Colors.green
+                                        : paymentStatus == 'REJECTED'
+                                            ? Colors.red
+                                            : Colors.orange.shade900,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
                           Text('Banco de Origen: ${bankName ?? "N/A"}', style: const TextStyle(fontSize: 13)),
                           const SizedBox(height: 4),
                           Text('Referencia: ${reference ?? "N/A"}', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
@@ -234,6 +275,44 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
                     ),
                     const SizedBox(height: 16),
                   ],
+
+                  // Delivery Location GPS Card
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppTheme.primary.withValues(alpha: 0.3)),
+                    ),
+                    child: Row(
+                      children: [
+                        const CircleAvatar(
+                          backgroundColor: AppTheme.primary,
+                          child: Icon(Icons.location_on, color: Colors.white),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Ubicación de Entrega (Google API)',
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(deliveryAddressText, style: const TextStyle(fontSize: 13)),
+                              const SizedBox(height: 2),
+                              Text(
+                                'GPS: Lat ${latitude.toStringAsFixed(4)}, Lng ${longitude.toStringAsFixed(4)}',
+                                style: const TextStyle(fontSize: 11, color: AppTheme.primary, fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
 
                   // Payment Summary Card
                   Container(

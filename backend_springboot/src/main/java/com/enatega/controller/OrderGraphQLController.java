@@ -32,18 +32,32 @@ public class OrderGraphQLController {
             @Argument("paymentMethod") String paymentMethod,
             @Argument("bankName") String bankName,
             @Argument("paymentReference") String paymentReference,
-            @Argument("paymentProofUrl") String paymentProofUrl) {
+            @Argument("paymentProofUrl") String paymentProofUrl,
+            @Argument("deliveryAddress") String deliveryAddress,
+            @Argument("latitude") Double latitude,
+            @Argument("longitude") Double longitude) {
         return orderService.placeOrder(
                 amount != null ? amount : 0.0,
                 paymentMethod,
                 bankName,
                 paymentReference,
-                paymentProofUrl
+                paymentProofUrl,
+                deliveryAddress,
+                latitude,
+                longitude
         );
     }
 
     @MutationMapping
     public Map<String, Object> updateOrderStatus(@Argument("id") String id, @Argument("status") String status) {
         return orderService.updateOrderStatus(id, status);
+    }
+
+    @MutationMapping
+    public Map<String, Object> updatePaymentStatus(
+            @Argument("id") String id,
+            @Argument("paymentStatus") String paymentStatus,
+            @Argument("orderStatus") String orderStatus) {
+        return orderService.updatePaymentStatus(id, paymentStatus, orderStatus);
     }
 }

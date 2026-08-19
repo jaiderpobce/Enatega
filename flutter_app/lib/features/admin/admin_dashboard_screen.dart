@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../core/graphql/graphql_queries.dart';
 import '../../core/services/graphql_service.dart';
 import '../../core/theme/app_theme.dart';
+import 'admin_payments_screen.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -302,6 +303,25 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 12),
+
+                  ListTile(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    tileColor: Colors.white,
+                    leading: const CircleAvatar(
+                      backgroundColor: Color(0xFFE8F5E9),
+                      child: Icon(Icons.verified_user_outlined, color: Colors.green),
+                    ),
+                    title: const Text('Verificación de Pagos (Comprobantes)', style: TextStyle(fontWeight: FontWeight.bold)),
+                    subtitle: const Text('Aprueba o rechaza las transferencias recibidas'),
+                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const AdminPaymentsScreen()),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 8),
 
                   ListTile(
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
