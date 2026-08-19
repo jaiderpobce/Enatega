@@ -35,7 +35,7 @@ public class OrderService {
     }
 
     @Transactional
-    public Map<String, Object> placeOrder(double orderAmount, String paymentMethod) {
+    public Map<String, Object> placeOrder(double orderAmount, String paymentMethod, String bankName, String paymentReference, String paymentProofUrl) {
         UserEntity user = userRepository.findAll().stream().findFirst()
                 .orElseThrow(() -> new RuntimeException("Usuario no autenticado para realizar pedido."));
 
@@ -46,6 +46,9 @@ public class OrderService {
                 .deliveryCharges(2.50)
                 .paymentStatus("PAID")
                 .paymentMethod(paymentMethod != null ? paymentMethod : "CASH")
+                .bankName(bankName)
+                .paymentReference(paymentReference)
+                .paymentProofUrl(paymentProofUrl)
                 .orderAmount(orderAmount)
                 .paidAmount(orderAmount + 2.50)
                 .orderStatus("PENDING")
@@ -73,6 +76,9 @@ public class OrderService {
         map.put("delivery_charges", order.getDeliveryCharges());
         map.put("payment_status", order.getPaymentStatus());
         map.put("payment_method", order.getPaymentMethod());
+        map.put("bank_name", order.getBankName());
+        map.put("payment_reference", order.getPaymentReference());
+        map.put("payment_proof_url", order.getPaymentProofUrl());
         map.put("order_amount", order.getOrderAmount());
         map.put("paid_amount", order.getPaidAmount());
         map.put("order_status", order.getOrderStatus());

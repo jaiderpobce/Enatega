@@ -30,6 +30,15 @@ public class OrderEntity {
     @Column(name = "payment_method")
     private String paymentMethod;
 
+    @Column(name = "bank_name")
+    private String bankName;
+
+    @Column(name = "payment_reference")
+    private String paymentReference;
+
+    @Column(name = "payment_proof_url", length = 1000)
+    private String paymentProofUrl;
+
     @Column(name = "order_amount")
     private Double orderAmount;
 

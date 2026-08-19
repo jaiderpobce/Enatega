@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../core/graphql/graphql_queries.dart';
 import '../../core/services/graphql_service.dart';
 import '../../core/theme/app_theme.dart';
+import '../chat/chat_screen.dart';
 
 class OrderTrackingScreen extends StatefulWidget {
   const OrderTrackingScreen({
@@ -66,6 +67,11 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
     final status = _orderData?['order_status']?.toString() ?? 'PENDING';
     final code = _orderData?['order_id']?.toString() ?? 'ORD-0000';
     final amount = (_orderData?['paid_amount'] as num?)?.toDouble() ?? 0.0;
+    final method = _orderData?['payment_method']?.toString() ?? 'CASH';
+    final bankName = _orderData?['bank_name']?.toString();
+    final reference = _orderData?['payment_reference']?.toString();
+    final proofUrl = _orderData?['payment_proof_url']?.toString();
+
     final currentStep = _getStepIndex(status);
 
     return Scaffold(
@@ -120,7 +126,34 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 28),
+                  const SizedBox(height: 20),
+
+                  // Chat Button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppTheme.primary,
+                        side: const BorderSide(color: AppTheme.primary, width: 1.5),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      icon: const Icon(Icons.chat_bubble_outline),
+                      label: const Text(
+                        'Contactar Repartidor (Chat)',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ChatScreen(orderCode: code),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 24),
 
                   // Progress Timeline
                   const Text(
@@ -158,9 +191,51 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
                     isCompleted: currentStep >= 3,
                     isLast: true,
                   ),
-                  const SizedBox(height: 28),
+                  const SizedBox(height: 24),
 
-                  // Payment Summary
+                  // Transfer / Bank Proof Details (If Transfer)
+                  if (method == 'TRANSFER' && (bankName != null || reference != null)) ...[
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Colors.grey.shade300),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Row(
+                            children: [
+                              Icon(Icons.account_balance, color: AppTheme.primary, size: 20),
+                              SizedBox(width: 8),
+                              Text('Datos de Transferencia Bancaria', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                            ],
+                          ),
+                          const Divider(height: 16),
+                          Text('Banco de Origen: ${bankName ?? "N/A"}', style: const TextStyle(fontSize: 13)),
+                          const SizedBox(height: 4),
+                          Text('Referencia: ${reference ?? "N/A"}', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                          if (proofUrl != null && proofUrl.isNotEmpty) ...[
+                            const SizedBox(height: 10),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.network(
+                                proofUrl,
+                                height: 100,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+
+                  // Payment Summary Card
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
@@ -177,10 +252,19 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Monto Total Pagado:', style: TextStyle(fontWeight: FontWeight.w600)),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('Método de Pago:', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                            Text(
+                              method == 'TRANSFER' ? 'Transferencia Bancaria' : 'Efectivo',
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                            ),
+                          ],
+                        ),
                         Text(
                           '\$${amount.toStringAsFixed(2)}',
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: AppTheme.primary),
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: AppTheme.primary),
                         ),
                       ],
                     ),

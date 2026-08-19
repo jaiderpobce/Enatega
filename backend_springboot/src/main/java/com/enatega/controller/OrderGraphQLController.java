@@ -27,8 +27,19 @@ public class OrderGraphQLController {
     }
 
     @MutationMapping
-    public Map<String, Object> placeOrder(@Argument("amount") Double amount, @Argument("paymentMethod") String paymentMethod) {
-        return orderService.placeOrder(amount != null ? amount : 0.0, paymentMethod);
+    public Map<String, Object> placeOrder(
+            @Argument("amount") Double amount,
+            @Argument("paymentMethod") String paymentMethod,
+            @Argument("bankName") String bankName,
+            @Argument("paymentReference") String paymentReference,
+            @Argument("paymentProofUrl") String paymentProofUrl) {
+        return orderService.placeOrder(
+                amount != null ? amount : 0.0,
+                paymentMethod,
+                bankName,
+                paymentReference,
+                paymentProofUrl
+        );
     }
 
     @MutationMapping

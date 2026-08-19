@@ -140,14 +140,17 @@ class GraphQLQueries {
   ''';
 
   static const String placeOrderMutation = '''
-    mutation PlaceOrder(\$amount: Float!, \$paymentMethod: String) {
-      placeOrder(amount: \$amount, paymentMethod: \$paymentMethod) {
+    mutation PlaceOrder(\$amount: Float!, \$paymentMethod: String, \$bankName: String, \$paymentReference: String, \$paymentProofUrl: String) {
+      placeOrder(amount: \$amount, paymentMethod: \$paymentMethod, bankName: \$bankName, paymentReference: \$paymentReference, paymentProofUrl: \$paymentProofUrl) {
         _id
         order_id
         order_amount
         paid_amount
         order_status
         payment_method
+        bank_name
+        payment_reference
+        payment_proof_url
         createdAt
       }
     }
@@ -196,6 +199,9 @@ class GraphQLQueries {
         delivery_charges
         payment_status
         payment_method
+        bank_name
+        payment_reference
+        payment_proof_url
         order_amount
         paid_amount
         order_status
