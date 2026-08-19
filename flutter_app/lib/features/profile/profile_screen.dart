@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../address/addresses_screen.dart';
+import '../admin/admin_dashboard_screen.dart';
 import '../auth/auth_controller.dart';
 import '../orders/my_orders_screen.dart';
 import '../rider/rider_dashboard_screen.dart';
@@ -77,6 +78,19 @@ class ProfileScreen extends StatelessWidget {
           const SizedBox(height: 24),
 
           // Options List
+          _ProfileOptionTile(
+            icon: Icons.admin_panel_settings_outlined,
+            title: 'Panel de Administración (Admin)',
+            subtitle: 'Métricas, Menú y Usuarios RBAC',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const AdminDashboardScreen()),
+              );
+            },
+          ),
+          const SizedBox(height: 12),
+
           _ProfileOptionTile(
             icon: Icons.delivery_dining_outlined,
             title: 'Modo Repartidor (Rider)',

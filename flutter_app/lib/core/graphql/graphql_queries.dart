@@ -203,4 +203,27 @@ class GraphQLQueries {
       }
     }
   ''';
+
+  static const String createCategoryMutation = '''
+    mutation CreateCategory(\$title: String!, \$description: String) {
+      createCategory(title: \$title, description: \$description) {
+        _id
+        title
+        description
+      }
+    }
+  ''';
+
+  static const String createFoodMutation = '''
+    mutation CreateFood(\$title: String!, \$price: Float!, \$categoryId: ID!, \$description: String, \$imgUrl: String) {
+      createFood(title: \$title, price: \$price, categoryId: \$categoryId, description: \$description, imgUrl: \$imgUrl) {
+        _id
+        title
+        description
+        img_url
+        price
+        stock
+      }
+    }
+  ''';
 }

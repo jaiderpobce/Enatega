@@ -1,5 +1,6 @@
 package com.enatega.service;
 
+import com.enatega.model.CategoryEntity;
 import com.enatega.model.FoodEntity;
 import com.enatega.repository.CategoryRepository;
 import com.enatega.repository.FoodRepository;
@@ -44,6 +45,7 @@ public class CatalogService {
             map.put("description", food.getDescription());
             map.put("img_url", food.getImgUrl());
             map.put("stock", food.getStock());
+            map.put("price", 9.99);
 
             if (food.getCategory() != null) {
                 Map<String, Object> catMap = new HashMap<>();
@@ -54,5 +56,44 @@ public class CatalogService {
 
             return map;
         }).collect(Collectors.toList());
+    }
+
+    @Transactional
+    public Map<String, Object> createCategory(String title, String description) {
+        CategoryEntity category = CategoryEntity.builder()
+                .title(title)
+                .description(description)
+                .build();
+        CategoryEntity saved = categoryRepository.save(category);
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("_id", saved.getId());
+        map.put("title", saved.getTitle());
+        map.put("description", saved.getDescription());
+        return map;
+    }
+
+    @Transactional
+    public Map<String, Object> createFood(String title, Double price, String categoryId, String description, String imgUrl) {
+        CategoryEntity category = categoryRepository.findById(categoryId).orElse(null);
+
+        FoodEntity food = FoodEntity.builder()
+                .title(title)
+                .description(description)
+                .imgUrl(imgUrl != null && !imgUrl.isEmpty() ? imgUrl : "https://images.unsplash.com/photo-1568901346375-23c9450c58cd")
+                .stock(100)
+                .category(category)
+                .build();
+
+        FoodEntity saved = foodRepository.save(food);
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("_id", saved.getId());
+        map.put("title", saved.getTitle());
+        map.put("description", saved.getDescription());
+        map.put("img_url", saved.getImgUrl());
+        map.put("price", price != null ? price : 9.99);
+        map.put("stock", saved.getStock());
+        return map;
     }
 }
