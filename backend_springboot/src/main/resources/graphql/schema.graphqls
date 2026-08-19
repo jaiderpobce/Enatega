@@ -123,6 +123,7 @@ type Mutation {
     createAddress(addressInput: AddressInput!): User
     assignRoleToUser(userId: ID!, roleName: String!): User
     placeOrder(amount: Float!, paymentMethod: String): Order
+    updateOrderStatus(id: ID!, status: String!): Order
 }
 
 input UserInput {

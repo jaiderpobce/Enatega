@@ -21,7 +21,10 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public List<Map<String, Object>> getOrders() {
-        return orderRepository.findAll().stream().map(this::buildOrderMap).collect(Collectors.toList());
+        return orderRepository.findAll().stream()
+                .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()))
+                .map(this::buildOrderMap)
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
@@ -51,6 +54,16 @@ public class OrderService {
 
         OrderEntity saved = orderRepository.save(newOrder);
         return buildOrderMap(saved);
+    }
+
+    @Transactional
+    public Map<String, Object> updateOrderStatus(String id, String status) {
+        OrderEntity order = orderRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Pedido no encontrado con ID: " + id));
+
+        order.setOrderStatus(status);
+        OrderEntity updated = orderRepository.save(order);
+        return buildOrderMap(updated);
     }
 
     private Map<String, Object> buildOrderMap(OrderEntity order) {

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../core/graphql/graphql_queries.dart';
 import '../../core/services/graphql_service.dart';
 import '../../core/theme/app_theme.dart';
+import 'order_tracking_screen.dart';
 
 class MyOrdersScreen extends StatefulWidget {
   const MyOrdersScreen({super.key});
@@ -87,73 +88,92 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                     separatorBuilder: (_, __) => const SizedBox(height: 12),
                     itemBuilder: (context, index) {
                       final order = _orders[index] as Map<String, dynamic>;
+                      final id = order['_id']?.toString() ?? '';
                       final orderId = order['order_id']?.toString() ?? 'ORD-0000';
                       final status = order['order_status']?.toString() ?? 'PENDING';
                       final amount = (order['paid_amount'] as num?)?.toDouble() ?? 0.0;
                       final date = order['createdAt']?.toString() ?? '';
 
-                      return Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.04),
-                              blurRadius: 8,
-                              offset: const Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  orderId,
-                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                                ),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: _getStatusColor(status).withValues(alpha: 0.1),
-                                    borderRadius: BorderRadius.circular(8),
+                      return GestureDetector(
+                        onTap: () {
+                          if (id.isNotEmpty) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => OrderTrackingScreen(orderId: id),
+                              ),
+                            );
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.04),
+                                blurRadius: 8,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    orderId,
+                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                                   ),
-                                  child: Text(
-                                    status,
-                                    style: TextStyle(
-                                      color: _getStatusColor(status),
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 12,
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: _getStatusColor(status).withValues(alpha: 0.1),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Text(
+                                      status,
+                                      style: TextStyle(
+                                        color: _getStatusColor(status),
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12,
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            if (date.isNotEmpty)
-                              Text(
-                                'Fecha: $date',
-                                style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                                ],
                               ),
-                            const Divider(height: 20),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                const Text('Total Pagado:', style: TextStyle(fontWeight: FontWeight.w600)),
+                              const SizedBox(height: 8),
+                              if (date.isNotEmpty)
                                 Text(
-                                  '\$${amount.toStringAsFixed(2)}',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                    color: AppTheme.primary,
-                                  ),
+                                  'Fecha: $date',
+                                  style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
                                 ),
-                              ],
-                            ),
-                          ],
+                              const Divider(height: 20),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Row(
+                                    children: [
+                                      Text('Total Pagado:', style: TextStyle(fontWeight: FontWeight.w600)),
+                                      SizedBox(width: 6),
+                                      Icon(Icons.arrow_forward_ios, size: 12, color: Colors.grey),
+                                    ],
+                                  ),
+                                  Text(
+                                    '\$${amount.toStringAsFixed(2)}',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                      color: AppTheme.primary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       );
                     },

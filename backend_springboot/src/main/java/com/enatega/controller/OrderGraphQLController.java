@@ -30,4 +30,9 @@ public class OrderGraphQLController {
     public Map<String, Object> placeOrder(@Argument("amount") Double amount, @Argument("paymentMethod") String paymentMethod) {
         return orderService.placeOrder(amount != null ? amount : 0.0, paymentMethod);
     }
+
+    @MutationMapping
+    public Map<String, Object> updateOrderStatus(@Argument("id") String id, @Argument("status") String status) {
+        return orderService.updateOrderStatus(id, status);
+    }
 }

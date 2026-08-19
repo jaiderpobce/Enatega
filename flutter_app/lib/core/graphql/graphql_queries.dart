@@ -175,4 +175,32 @@ class GraphQLQueries {
       }
     }
   ''';
+
+  static const String updateOrderStatusMutation = '''
+    mutation UpdateOrderStatus(\$id: ID!, \$status: String!) {
+      updateOrderStatus(id: \$id, status: \$status) {
+        _id
+        order_id
+        order_status
+        paid_amount
+        createdAt
+      }
+    }
+  ''';
+
+  static const String orderByIdQuery = '''
+    query GetOrderById(\$id: String!) {
+      order(id: \$id) {
+        _id
+        order_id
+        delivery_charges
+        payment_status
+        payment_method
+        order_amount
+        paid_amount
+        order_status
+        createdAt
+      }
+    }
+  ''';
 }

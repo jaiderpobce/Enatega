@@ -5,6 +5,7 @@ import '../../core/theme/app_theme.dart';
 import '../address/addresses_screen.dart';
 import '../auth/auth_controller.dart';
 import '../orders/my_orders_screen.dart';
+import '../rider/rider_dashboard_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -76,6 +77,19 @@ class ProfileScreen extends StatelessWidget {
           const SizedBox(height: 24),
 
           // Options List
+          _ProfileOptionTile(
+            icon: Icons.delivery_dining_outlined,
+            title: 'Modo Repartidor (Rider)',
+            subtitle: 'Gestiona la entrega de pedidos activos',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const RiderDashboardScreen()),
+              );
+            },
+          ),
+          const SizedBox(height: 12),
+
           _ProfileOptionTile(
             icon: Icons.location_on_outlined,
             title: 'Mis Direcciones de Entrega',
