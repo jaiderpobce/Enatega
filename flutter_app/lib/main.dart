@@ -5,6 +5,7 @@ import 'app/app.dart';
 import 'core/services/graphql_service.dart';
 import 'core/services/storage_service.dart';
 import 'features/auth/auth_controller.dart';
+import 'features/cart/cart_controller.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,6 +26,7 @@ Future<void> main() async {
         Provider<StorageService>.value(value: storageService),
         Provider<GraphQLService>.value(value: graphqlService),
         ChangeNotifierProvider<AuthController>.value(value: authController),
+        ChangeNotifierProvider<CartController>(create: (_) => CartController()),
       ],
       child: const FoodDeliveryApp(),
     ),
