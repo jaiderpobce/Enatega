@@ -1,0 +1,24 @@
+.expo
+.DS_Store
+*.log
+
+# Docker / MySQL Data
+backend_springboot/mysql_data/
+
+# Maven / Java Build
+backend_springboot/target/
+*.class
+*.jar
+
+# Flutter / Dart Build
+flutter_app/.dart_tool/
+flutter_app/.flutter-plugins
+flutter_app/.flutter-plugins-dependencies
+flutter_app/build/
+flutter_app/.pub/
+flutter_app/.pub-cache/
+
+# IDEs
+.idea/
+.vscode/
+*.iml

@@ -1,0 +1,141 @@
+class GraphQLQueries {
+  static const String loginMutation = '''
+    mutation Login(\$facebookId: String, \$email: String, \$password: String, \$type: String!, \$appleId: String, \$name: String, \$notificationToken: String) {
+      login(facebookId: \$facebookId, email: \$email, password: \$password, type: \$type, appleId: \$appleId, name: \$name, notificationToken: \$notificationToken) {
+        userId
+        token
+        is_active
+        tokenExpiration
+        name
+        email
+        phone
+      }
+    }
+  ''';
+
+  static const String createUserMutation = '''
+    mutation CreateUser(\$facebookId: String, \$phone: String, \$email: String, \$password: String, \$name: String, \$notificationToken: String, \$appleId: String) {
+      createUser(userInput: {
+        facebookId: \$facebookId,
+        phone: \$phone,
+        email: \$email,
+        password: \$password,
+        name: \$name,
+        notificationToken: \$notificationToken,
+        appleId: \$appleId
+      }) {
+        userId
+        token
+        tokenExpiration
+        name
+        email
+        phone
+        notificationToken
+      }
+    }
+  ''';
+
+  static const String profileQuery = '''
+    query GetProfile {
+      profile {
+        _id
+        name
+        phone
+        email
+        is_active
+        notificationToken
+        is_order_notification
+        is_offer_notification
+        addresses {
+          _id
+          label
+          delivery_address
+          details
+          longitude
+          latitude
+          selected
+        }
+      }
+    }
+  ''';
+
+  static const String categoriesQuery = '''
+    query GetCategories {
+      categories {
+        _id
+        title
+        description
+        img_menu
+      }
+    }
+  ''';
+
+  static const String foodsByCategoryQuery = '''
+    query FoodByCategory(\$category: String!, \$onSale: Boolean, \$inStock: Boolean, \$min: Float, \$max: Float, \$search: String) {
+      foodByCategory(category: \$category, onSale: \$onSale, inStock: \$inStock, min: \$min, max: \$max, search: \$search) {
+        _id
+        title
+        description
+        img_url
+        stock
+        category {
+          _id
+        }
+        variations {
+          _id
+          title
+          price
+          discounted
+          addons {
+            _id
+            title
+            description
+            quantity_minimum
+            quantity_maximum
+            options {
+              _id
+              title
+              description
+              price
+            }
+          }
+        }
+      }
+    }
+  ''';
+
+  static const String myOrdersQuery = '''
+    query GetOrders(\$offset: Int) {
+      orders(offset: \$offset) {
+        _id
+        order_id
+        delivery_charges
+        payment_status
+        payment_method
+        order_amount
+        paid_amount
+        order_status
+        createdAt
+        delivery_address {
+          delivery_address
+          details
+          label
+        }
+        items {
+          _id
+          quantity
+          food {
+            _id
+            title
+            img_url
+          }
+          variation {
+            _id
+            title
+            price
+          }
+        }
+      }
+    }
+  ''';
+}
