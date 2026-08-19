@@ -1,0 +1,146 @@
+type Permission {
+    id: ID!
+    name: String!
+    description: String
+}
+
+type Role {
+    id: ID!
+    name: String!
+    description: String
+    permissions: [Permission]
+}
+
+type User {
+    _id: ID!
+    userId: ID!
+    name: String
+    email: String
+    phone: String
+    token: String
+    is_active: Boolean
+    tokenExpiration: Int
+    notificationToken: String
+    is_order_notification: Boolean
+    is_offer_notification: Boolean
+    addresses: [Address]
+    roles: [Role]
+}
+
+type Address {
+    _id: ID!
+    label: String
+    delivery_address: String
+    details: String
+    longitude: Float
+    latitude: Float
+    selected: Boolean
+}
+
+type Category {
+    _id: ID!
+    title: String
+    description: String
+    img_menu: String
+}
+
+type AddonOption {
+    _id: ID!
+    title: String
+    description: String
+    price: Float
+}
+
+type Addon {
+    _id: ID!
+    title: String
+    description: String
+    quantity_minimum: Int
+    quantity_maximum: Int
+    options: [AddonOption]
+}
+
+type Variation {
+    _id: ID!
+    title: String
+    price: Float
+    discounted: Float
+    addons: [Addon]
+}
+
+type Food {
+    _id: ID!
+    title: String
+    description: String
+    img_url: String
+    stock: Int
+    category: Category
+    variations: [Variation]
+}
+
+type OrderItem {
+    _id: ID!
+    food: Food
+    variation: Variation
+    quantity: Int
+}
+
+type Order {
+    _id: ID!
+    order_id: String
+    delivery_charges: Float
+    payment_status: String
+    payment_method: String
+    bank_name: String
+    payment_reference: String
+    payment_proof_url: String
+    delivery_address_text: String
+    latitude: Float
+    longitude: Float
+    order_amount: Float
+    paid_amount: Float
+    order_status: String
+    createdAt: String
+    delivery_address: Address
+    items: [OrderItem]
+}
+
+input AddressInput {
+    label: String!
+    delivery_address: String!
+    details: String
+    longitude: Float
+    latitude: Float
+    selected: Boolean
+}
+
+type Query {
+    profile: User
+    categories: [Category]
+    foodByCategory(category: String!, onSale: Boolean, inStock: Boolean, min: Float, max: Float, search: String): [Food]
+    orders(offset: Int): [Order]
+    order(id: String!): Order
+    roles: [Role]
+}
+
+type Mutation {
+    login(facebookId: String, email: String, password: String, type: String!, appleId: String, name: String, notificationToken: String): User
+    createUser(userInput: UserInput!): User
+    createAddress(addressInput: AddressInput!): User
+    assignRoleToUser(userId: ID!, roleName: String!): User
+    placeOrder(amount: Float!, paymentMethod: String, bankName: String, paymentReference: String, paymentProofUrl: String, deliveryAddress: String, latitude: Float, longitude: Float): Order
+    updateOrderStatus(id: ID!, status: String!): Order
+    updatePaymentStatus(id: ID!, paymentStatus: String!, orderStatus: String!): Order
+    createFood(title: String!, price: Float!, categoryId: ID!, description: String, imgUrl: String): Food
+    createCategory(title: String!, description: String): Category
+}
+
+input UserInput {
+    name: String
+    email: String
+    password: String
+    phone: String
+    facebookId: String
+    appleId: String
+    notificationToken: String
+}

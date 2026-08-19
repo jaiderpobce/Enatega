@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+  mysql-db:
+    image: mysql:8.0
+    container_name: enatega-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: enatega_db
+      MYSQL_USER: enatega_user
+      MYSQL_PASSWORD: enatega_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql_data:/var/lib/mysql
+    networks:
+      - enatega-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  springboot-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: enatega-springboot
+    restart: always
+    ports:
+      - "8081:8081"
+    volumes:
+      - ./src:/app/src
+      - ./pom.xml:/app/pom.xml
+      - maven_repo:/root/.m2
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/enatega_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: enatega_user
+      SPRING_DATASOURCE_PASSWORD: enatega_password
+      SERVER_PORT: 8081
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+    networks:
+      - enatega-net
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: enatega-phpmyadmin
+    restart: always
+    ports:
+      - "8082:80"
+    environment:
+      PMA_HOST: mysql-db
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: rootpassword
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+    networks:
+      - enatega-net
+
+volumes:
+  maven_repo:
+
+networks:
+  enatega-net:
+    driver: bridge
